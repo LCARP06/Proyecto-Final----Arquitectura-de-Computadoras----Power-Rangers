@@ -146,7 +146,7 @@ def ensamblar_codigo(ruta_entrada, ruta_salida):
 
         codigo_maquina.append(binario)
 
-    # Escribir archivo de instrucciones
+    # Escribir archivo de instrucciones:
     with open(ruta_salida, 'w') as archivo_salida:
         for binario in codigo_maquina:
             archivo_salida.write(binario + '\n')
