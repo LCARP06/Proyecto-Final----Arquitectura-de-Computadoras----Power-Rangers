@@ -24,13 +24,8 @@ module DPTR_tb;
 
 
 
-        $readmemb("TestF3_MemInst.mem",
+        $readmemb("bubble_decodificado",
                    uut.instruction_memory.mem);
-
-
-        $readmemb("TestF1_BReg.mem",
-                   uut.br.mem);
-
    
         $readmemb("TestF1_MemInst.mem",
                    uut.mem.mem);

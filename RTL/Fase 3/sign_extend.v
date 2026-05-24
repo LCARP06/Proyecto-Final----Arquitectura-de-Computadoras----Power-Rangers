@@ -1,8 +1,8 @@
 module sign_extend(
-    input  [15:0] inmediato,
-    output [31:0] extendido
+    input  [15:0] in,
+    output [31:0] out
 );
 
-assign extendido = {{16{inmediato[15]}}, inmediato};
+assign out = {{16{in[15]}}, in};
 
 endmodule

@@ -8,10 +8,7 @@ module DPTR(
     wire [31:0] insTR;
     wire [31:0] next_pc_mux_out;
     wire pc_src;
-
-    //========================================
-    // IF STAGE
-    //========================================
+    wire [31:0] ex_mem_branch_target;
 
     pc my_pc(
         .clk(clk),
@@ -38,10 +35,6 @@ module DPTR(
         .Write_data(next_pc_mux_out)
     );
 
-    //========================================
-    // IF/ID
-    //========================================
-
     wire [31:0] if_id_pc_plus_4;
     wire [31:0] if_id_instruction;
 
@@ -53,10 +46,6 @@ module DPTR(
         .pc_plus_4_out(if_id_pc_plus_4),
         .instruction_out(if_id_instruction)
     );
-
-    //========================================
-    // ID STAGE
-    //========================================
 
     wire C_RegDst;
     wire C_ALUSrc;
@@ -99,14 +88,13 @@ module DPTR(
         .DR2(DR2_wire)
     );
 
-    SignExtend se(
-        .in(if_id_instruction[15:0]),
-        .out(sign_extended_wire)
-    );
+    sign_extend se(
 
-    //========================================
-    // ID/EX
-    //========================================
+        .in(if_id_instruction[15:0]),
+
+        .out(sign_extended_wire)
+
+    );
 
     wire id_ex_regDst;
     wire id_ex_aluSrc;
@@ -126,7 +114,6 @@ module DPTR(
     wire [4:0] id_ex_rt;
     wire [4:0] id_ex_rd;
 
-    // CORRECCION IMPORTANTE
     wire [5:0] id_ex_funct;
 
     ID_EX buffer_id_ex(
@@ -150,7 +137,6 @@ module DPTR(
         .rt_in(if_id_instruction[20:16]),
         .rd_in(if_id_instruction[15:11]),
 
-        // NUEVO
         .funct_in(if_id_instruction[5:0]),
 
         .regDst_out(id_ex_regDst),
@@ -170,13 +156,8 @@ module DPTR(
         .rt_out(id_ex_rt),
         .rd_out(id_ex_rd),
 
-        // NUEVO
         .funct_out(id_ex_funct)
     );
-
-    //========================================
-    // EX STAGE
-    //========================================
 
     wire [31:0] alu_operand_b;
     wire [3:0] alu_control_out;
@@ -194,10 +175,6 @@ module DPTR(
         .sel(id_ex_aluSrc),
         .out(alu_operand_b)
     );
-
-    //========================================
-    // CORRECCION IMPORTANTE
-    //========================================
 
     ALuControl aluctrl(
         .ALUOp(id_ex_aluOp),
@@ -228,17 +205,12 @@ module DPTR(
         .direccion_branch(branch_target_ex)
     );
 
-    //========================================
-    // EX/MEM
-    //========================================
-
     wire ex_mem_branch;
     wire ex_mem_memRead;
     wire ex_mem_memWrite;
     wire ex_mem_regWrite;
     wire ex_mem_memToReg;
 
-    wire [31:0] ex_mem_branch_target;
     wire ex_mem_zero;
 
     wire [31:0] ex_mem_alu_result;
@@ -277,10 +249,6 @@ module DPTR(
 
     assign pc_src = ex_mem_branch & ex_mem_zero;
 
-    //========================================
-    // MEM STAGE
-    //========================================
-
     wire [31:0] mem_read_data;
 
     MEM mem(
@@ -291,10 +259,6 @@ module DPTR(
         .MemToRead(ex_mem_memRead),
         .ReadData(mem_read_data)
     );
-
-    //========================================
-    // MEM/WB
-    //========================================
 
     wire mem_wb_memToReg;
 
@@ -319,10 +283,6 @@ module DPTR(
         .alu_result_out(mem_wb_alu_result),
         .write_reg_out(wb_write_reg)
     );
-
-    //========================================
-    // WB STAGE
-    //========================================
 
     MUX2_1 wb_mux(
         .ALUR(mem_wb_alu_result),

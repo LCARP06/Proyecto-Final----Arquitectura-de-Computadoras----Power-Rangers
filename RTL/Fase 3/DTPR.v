@@ -8,6 +8,7 @@ module DPTR(
     wire [31:0] insTR;
     wire [31:0] next_pc_mux_out;
     wire pc_src;
+    wire [31:0] ex_mem_branch_target;
     
     pc my_pc(
         .clk(clk),
@@ -77,7 +78,7 @@ module DPTR(
         .DR2(DR2_wire)
     );
 
-    SignExtend se(
+    sign_extend se(
         .in(if_id_instruction[15:0]),
         .out(sign_extended_wire)
     );
@@ -85,8 +86,8 @@ module DPTR(
     wire id_ex_regDst, id_ex_aluSrc, id_ex_branch, id_ex_memRead, id_ex_memWrite, id_ex_regWrite, id_ex_memToReg;
     wire [2:0] id_ex_aluOp;
     wire [31:0] id_ex_pc_plus_4, id_ex_read_data_1, id_ex_read_data_2, id_ex_sign_extend;
-wire [4:0] id_ex_rt, id_ex_rd;
-wire [5:0] id_ex_funct;
+    wire [4:0] id_ex_rt, id_ex_rd;
+    wire [5:0] id_ex_funct;
 
     ID_EX buffer_id_ex(
         .clk(clk),
@@ -166,7 +167,6 @@ wire [5:0] id_ex_funct;
     );
 
     wire ex_mem_branch, ex_mem_memRead, ex_mem_memWrite, ex_mem_regWrite, ex_mem_memToReg;
-    wire [31:0] ex_mem_branch_target;
     wire ex_mem_zero;
     wire [31:0] ex_mem_alu_result;
     wire [31:0] ex_mem_write_data;
