@@ -6,7 +6,8 @@
 .globl main
 
 main:
-    addi $s0, $zero, 0     
+    lui $s0, 0x10010000       
+    ori $s0, $s0, 0     
     
     lw $s1, 36($s0)     
     addi $s2, $s1, -1   

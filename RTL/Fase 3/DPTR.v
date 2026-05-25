@@ -9,7 +9,7 @@ module DPTR(
     wire [31:0] next_pc_mux_out;
     wire pc_src;
     wire [31:0] ex_mem_branch_target;
-
+    
     pc my_pc(
         .clk(clk),
         .reset(reset),
@@ -47,20 +47,10 @@ module DPTR(
         .instruction_out(if_id_instruction)
     );
 
-    wire C_RegDst;
-    wire C_ALUSrc;
-    wire C_Branch;
-    wire C_MemRead;
-    wire C_MemWrite;
-    wire C_RegWrite;
-    wire C_MemToReg;
-
+    wire C_RegDst, C_ALUSrc, C_Branch, C_MemToRead, C_MemToWrite, C_RegWrite, C_MemToReg;
     wire [2:0] C_ALUOp;
-
-    wire [31:0] DR1_wire;
-    wire [31:0] DR2_wire;
+    wire [31:0] DR1_wire, DR2_wire;
     wire [31:0] sign_extended_wire;
-
     wire [4:0] wb_write_reg;
     wire [31:0] wb_write_data;
     wire wb_regWrite;
@@ -70,15 +60,15 @@ module DPTR(
         .RegDst(C_RegDst),
         .ALUSrc(C_ALUSrc),
         .MemToReg(C_MemToReg),
-        .MemWrite(C_MemWrite),
-        .MemRead(C_MemRead),
+        .MemWrite(C_MemToWrite), 
+        .MemRead(C_MemToRead),   
         .Branch(C_Branch),
         .ALUOp(C_ALUOp),
         .RegWrite(C_RegWrite)
     );
 
     BR br(
-        .clk(clk),
+        .clk(clk),                 
         .WE(wb_regWrite),
         .AR1(if_id_instruction[25:21]),
         .AR2(if_id_instruction[20:16]),
@@ -89,206 +79,21 @@ module DPTR(
     );
 
     sign_extend se(
-
         .in(if_id_instruction[15:0]),
-
         .out(sign_extended_wire)
-
     );
 
-    wire id_ex_regDst;
-    wire id_ex_aluSrc;
-    wire id_ex_branch;
-    wire id_ex_memRead;
-    wire id_ex_memWrite;
-    wire id_ex_regWrite;
-    wire id_ex_memToReg;
-
+    wire id_ex_regDst, id_ex_aluSrc, id_ex_branch, id_ex_memRead, id_ex_memWrite, id_ex_regWrite, id_ex_memToReg;
     wire [2:0] id_ex_aluOp;
-
-    wire [31:0] id_ex_pc_plus_4;
-    wire [31:0] id_ex_read_data_1;
-    wire [31:0] id_ex_read_data_2;
-    wire [31:0] id_ex_sign_extend;
-
-    wire [4:0] id_ex_rt;
-    wire [4:0] id_ex_rd;
-
+    wire [31:0] id_ex_pc_plus_4, id_ex_read_data_1, id_ex_read_data_2, id_ex_sign_extend;
+    wire [4:0] id_ex_rt, id_ex_rd;
     wire [5:0] id_ex_funct;
 
     ID_EX buffer_id_ex(
         .clk(clk),
         .reset(reset),
-
         .regDst_in(C_RegDst),
         .aluOp_in(C_ALUOp),
         .aluSrc_in(C_ALUSrc),
         .branch_in(C_Branch),
-        .memRead_in(C_MemRead),
-        .memWrite_in(C_MemWrite),
-        .regWrite_in(C_RegWrite),
-        .memToReg_in(C_MemToReg),
-
-        .pc_plus_4_in(if_id_pc_plus_4),
-        .read_data_1_in(DR1_wire),
-        .read_data_2_in(DR2_wire),
-        .sign_extend_in(sign_extended_wire),
-
-        .rt_in(if_id_instruction[20:16]),
-        .rd_in(if_id_instruction[15:11]),
-
-        .funct_in(if_id_instruction[5:0]),
-
-        .regDst_out(id_ex_regDst),
-        .aluOp_out(id_ex_aluOp),
-        .aluSrc_out(id_ex_aluSrc),
-        .branch_out(id_ex_branch),
-        .memRead_out(id_ex_memRead),
-        .memWrite_out(id_ex_memWrite),
-        .regWrite_out(id_ex_regWrite),
-        .memToReg_out(id_ex_memToReg),
-
-        .pc_plus_4_out(id_ex_pc_plus_4),
-        .read_data_1_out(id_ex_read_data_1),
-        .read_data_2_out(id_ex_read_data_2),
-        .sign_extend_out(id_ex_sign_extend),
-
-        .rt_out(id_ex_rt),
-        .rd_out(id_ex_rd),
-
-        .funct_out(id_ex_funct)
-    );
-
-    wire [31:0] alu_operand_b;
-    wire [3:0] alu_control_out;
-    wire [31:0] alu_result;
-    wire alu_zero;
-
-    wire [4:0] ex_write_reg;
-
-    wire [31:0] shift_left_ex;
-    wire [31:0] branch_target_ex;
-
-    Mux21 #(.WIDTH(32)) alu_src_mux(
-        .d0(id_ex_read_data_2),
-        .d1(id_ex_sign_extend),
-        .sel(id_ex_aluSrc),
-        .out(alu_operand_b)
-    );
-
-    ALuControl aluctrl(
-        .ALUOp(id_ex_aluOp),
-        .FUNC(id_ex_funct),
-        .salidaAC(alu_control_out)
-    );
-
-    ALU alu(
-        .A(id_ex_read_data_1),
-        .B(alu_operand_b),
-        .sel(alu_control_out),
-        .R(alu_result),
-        .Zero(alu_zero)
-    );
-
-    Mux21 #(.WIDTH(5)) reg_dst_mux(
-        .d0(id_ex_rt),
-        .d1(id_ex_rd),
-        .sel(id_ex_regDst),
-        .out(ex_write_reg)
-    );
-
-    assign shift_left_ex = id_ex_sign_extend << 2;
-
-    branch_adder BA(
-        .pc_mas_4(id_ex_pc_plus_4),
-        .desplazado(shift_left_ex),
-        .direccion_branch(branch_target_ex)
-    );
-
-    wire ex_mem_branch;
-    wire ex_mem_memRead;
-    wire ex_mem_memWrite;
-    wire ex_mem_regWrite;
-    wire ex_mem_memToReg;
-
-    wire ex_mem_zero;
-
-    wire [31:0] ex_mem_alu_result;
-    wire [31:0] ex_mem_write_data;
-
-    wire [4:0] ex_mem_write_reg;
-
-    EX_MEM buffer_ex_mem(
-        .clk(clk),
-        .reset(reset),
-
-        .branch_in(id_ex_branch),
-        .memRead_in(id_ex_memRead),
-        .memWrite_in(id_ex_memWrite),
-        .regWrite_in(id_ex_regWrite),
-        .memToReg_in(id_ex_memToReg),
-
-        .branch_target_in(branch_target_ex),
-        .zero_in(alu_zero),
-        .alu_result_in(alu_result),
-        .write_data_in(id_ex_read_data_2),
-        .write_reg_in(ex_write_reg),
-
-        .branch_out(ex_mem_branch),
-        .memRead_out(ex_mem_memRead),
-        .memWrite_out(ex_mem_memWrite),
-        .regWrite_out(ex_mem_regWrite),
-        .memToReg_out(ex_mem_memToReg),
-
-        .branch_target_out(ex_mem_branch_target),
-        .zero_out(ex_mem_zero),
-        .alu_result_out(ex_mem_alu_result),
-        .write_data_out(ex_mem_write_data),
-        .write_reg_out(ex_mem_write_reg)
-    );
-
-    assign pc_src = ex_mem_branch & ex_mem_zero;
-
-    wire [31:0] mem_read_data;
-
-    MEM mem(
-        .clk(clk),
-        .Address(ex_mem_alu_result),
-        .WriteData(ex_mem_write_data),
-        .MemToWrite(ex_mem_memWrite),
-        .MemToRead(ex_mem_memRead),
-        .ReadData(mem_read_data)
-    );
-
-    wire mem_wb_memToReg;
-
-    wire [31:0] mem_wb_read_data;
-    wire [31:0] mem_wb_alu_result;
-
-    MEM_WB buffer_mem_wb(
-        .clk(clk),
-        .reset(reset),
-
-        .regWrite_in(ex_mem_regWrite),
-        .memToReg_in(ex_mem_memToReg),
-
-        .read_data_in(mem_read_data),
-        .alu_result_in(ex_mem_alu_result),
-        .write_reg_in(ex_mem_write_reg),
-
-        .regWrite_out(wb_regWrite),
-        .memToReg_out(mem_wb_memToReg),
-
-        .read_data_out(mem_wb_read_data),
-        .alu_result_out(mem_wb_alu_result),
-        .write_reg_out(wb_write_reg)
-    );
-
-    MUX2_1 wb_mux(
-        .ALUR(mem_wb_alu_result),
-        .Read_data(mem_wb_read_data),
-        .MemToReg(mem_wb_memToReg),
-        .Write_data(wb_write_data)
-    );
-
-endmodule
+        .memRead_in(C_MemToRead),

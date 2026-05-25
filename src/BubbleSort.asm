@@ -1,49 +1,45 @@
-.data
-    arreglo:    .word 8, 3, 1, 9, 5, 2, 7, 4, 6  
-    tamano:     .word 9  
+addi $s0, $zero, 0
+addi $s1, $zero, 36
 
-.text
-.globl main
+loop_principal:
+nop
+nop
+nop
+beq $s0, $s1, fin_programa
+addi $s2, $zero, 0
 
-main:
-    addi $s0, $zero, 0     
-    
-    lw $s1, 36($s0)     
-    addi $s2, $s1, -1   
+loop_interno:
+nop
+nop
+nop
+sub $t7, $s1, $s0
+nop
+nop
+nop
+beq $s2, $t7, siguiente_iteracion
+lw $t0, 0($s2)
+nop
+nop
+nop
+lw $t1, 4($s2)
+nop
+nop
+nop
+slt $t2, $t1, $t0
+nop
+nop
+nop
+beq $t2, $zero, avanzar_indice
+sw $t1, 0($s2)
+sw $t0, 4($s2)
 
-    addi $t0, $zero, 0   
-bucle_externo:
-    slt $at, $t0, $s2    
-    beq $at, $zero, fin_sort 
+avanzar_indice:
+addi $s2, $s2, 4
+j loop_interno
 
-    sub $t2, $s2, $t0    
-    addi $t1, $zero, 0   
+siguiente_iteracion:
+addi $s0, $s0, 4
+j loop_principal
 
-bucle_interno:
-    slt $at, $t1, $t2    
-    beq $at, $zero, avance_externo 
-
-    add $t3, $t1, $t1    
-    add $t3, $t3, $t3    
-    add $t4, $s0, $t3    
-
-    lw $t5, 0($t4)       
-    lw $t6, 4($t4)       
-
-    slt $at, $t6, $t5    
-    beq $at, $zero, no_intercambiar 
-
-    sw $t6, 0($t4)       
-    sw $t5, 4($t4)       
-
-no_intercambiar:
-    addi $t1, $t1, 1     
-    j bucle_interno
-
-avance_externo:
-    addi $t0, $t0, 1     
-    j bucle_externo
-
-fin_sort:
-bucle_final:
-    j bucle_final
+fin_programa:
+j fin_programa

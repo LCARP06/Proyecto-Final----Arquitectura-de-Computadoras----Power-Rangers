@@ -12,7 +12,7 @@ reg [31:0]mem[0:31];
 
 initial
 begin
-    $readmemb("TestF1_MemInst.mem",mem);
+    $readmemb("TestF1_BReg.mem",mem);
 end
 
 

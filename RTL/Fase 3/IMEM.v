@@ -7,7 +7,7 @@ reg [31:0] mem [0:31];
 
 initial
 begin
-    $readmemb("bubble_decodificado", mem);
+    $readmemb("bubble_decodificado.mem", mem);
 end
 
 // Address[6:2]:

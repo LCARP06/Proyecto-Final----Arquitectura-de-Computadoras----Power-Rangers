@@ -21,21 +21,12 @@ module DPTR_tb;
 
         clk = 0;
         reset = 1;
-
-
-
-        $readmemb("bubble_decodificado",
-                   uut.instruction_memory.mem);
-   
-        $readmemb("TestF1_MemInst.mem",
-                   uut.mem.mem);
-
     
         #20;
         reset = 0;
 
 
-        #5000;
+        #500000;
 
         $display("========================================");
         $display("RESULTADO FINAL DE MEMORIA");
