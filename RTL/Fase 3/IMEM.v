@@ -10,8 +10,7 @@ begin
     $readmemb("bubble_decodificado.mem", mem);
 end
 
-// Address[6:2]:
-// divide entre 4 para direccionamiento por palabra
+
 assign Instruction = mem[Address[6:2]];
 
 endmodule
